@@ -31,9 +31,9 @@ class window.Router
 	navigate : (url, trigger=true, replace=false, name=null)->
 		@trigger = trigger
 		if replace 
-			History.replaceState {'url' : url}, null, url
+			History.replaceState {'url' : url}, name, url
 		else
-			History.pushState {'url' : url}, null, url
+			History.pushState {'url' : url}, name, url
 
 	go: (num)->
 		History.go num
