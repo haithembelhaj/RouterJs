@@ -58,7 +58,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
         }, null, url);
       }
     };
-
+    
+    Router.prototype.start = function(url) {
+      var stateObj = {};
+      if (url != null) stateObj = {data: {url: url}};
+      else stateObj = History.getState();
+      return this.checkRoutes(stateObj);
+    };
+    
     Router.prototype.go = function(num) {
       return History.go(num);
     };
