@@ -11,18 +11,18 @@ class window.Router
 	trigger: true
 
 
-	constructor: (@routes = {})->
-		History.Adapter.bind window, 'statechange', ()=>
+	constructor: (@routes = {}) ->
+		History.Adapter.bind window, 'statechange', =>
 			@checkRoutes History.getState()
 
 
-	route: (route, callback)->
+	route: (route, callback) ->
 		route = route.replace(Router.namedParam, '([^\/]+)')
 					 .replace(Router.splatParam, '(.*?)')
 		@routes["^#{route}$"] = callback
 
 
-	checkRoutes: (state)->
+	checkRoutes: (state) ->
 		if @trigger
 			for regexText, callback of @routes
 				regex = new RegExp regexText
@@ -32,8 +32,7 @@ class window.Router
 		@trigger = true
 
 
-	navigate : (url, trigger=true, replace=false, name=null)->
-		@trigger = trigger
+	navigate : (url, @trigger=true, replace=false, name=null) ->
 		return History.replaceState {'url' : url}, name, url if replace
 		History.pushState {'url' : url}, name, url
 
@@ -46,11 +45,11 @@ class window.Router
 		@checkRoutes(stateObj)
 
 
-	go: (num)->
+	go: (num) ->
 		History.go num
 
 
-	back : ()->
+	back : ->
 		History.back()
 
 
