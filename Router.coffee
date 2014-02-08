@@ -10,16 +10,19 @@ class window.Router
 	@splatParam: /\*\w+/g
 	trigger: true
 
-	constructor: (@routes = {})->
-		History.Adapter.bind window, 'statechange', ()=>
+
+	constructor: (@routes = {}) ->
+		History.Adapter.bind window, 'statechange', =>
 			@checkRoutes History.getState()
 
-	route: (route, callback)->
+
+	route: (route, callback) ->
 		route = route.replace(Router.namedParam, '([^\/]+)')
 					 .replace(Router.splatParam, '(.*?)')
 		@routes["^#{route}$"] = callback
 
-	checkRoutes: (state)->
+
+	checkRoutes: (state) ->
 		if @trigger
 			for regexText, callback of @routes
 				regex = new RegExp regexText
@@ -28,17 +31,25 @@ class window.Router
 					callback.apply(window, regex.exec(url).slice(1))
 		@trigger = true
 
-	navigate : (url, trigger=true, replace=false, name=null)->
-		@trigger = trigger
-		if replace 
-			History.replaceState {'url' : url}, name, url
-		else
-			History.pushState {'url' : url}, name, url
 
-	go: (num)->
+	navigate : (url, @trigger=true, replace=false, name=null) ->
+		return History.replaceState {'url' : url}, name, url if replace
+		History.pushState {'url' : url}, name, url
+
+
+	start: (url) ->
+		if url?
+			stateObj = data: url: url
+		else
+			stateObj = History.getState()
+		@checkRoutes(stateObj)
+
+
+	go: (num) ->
 		History.go num
 
-	back : ()->
+
+	back : ->
 		History.back()
 
 
