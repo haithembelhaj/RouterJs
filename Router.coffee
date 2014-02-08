@@ -10,14 +10,17 @@ class window.Router
 	@splatParam: /\*\w+/g
 	trigger: true
 
+
 	constructor: (@routes = {})->
 		History.Adapter.bind window, 'statechange', ()=>
 			@checkRoutes History.getState()
+
 
 	route: (route, callback)->
 		route = route.replace(Router.namedParam, '([^\/]+)')
 					 .replace(Router.splatParam, '(.*?)')
 		@routes["^#{route}$"] = callback
+
 
 	checkRoutes: (state)->
 		if @trigger
@@ -28,15 +31,24 @@ class window.Router
 					callback.apply(window, regex.exec(url).slice(1))
 		@trigger = true
 
+
 	navigate : (url, trigger=true, replace=false, name=null)->
 		@trigger = trigger
-		if replace 
-			History.replaceState {'url' : url}, name, url
+		return History.replaceState {'url' : url}, name, url if replace
+		History.pushState {'url' : url}, name, url
+
+
+	start: (url) ->
+		if url?
+			stateObj = data: url: url
 		else
-			History.pushState {'url' : url}, name, url
+			stateObj = History.getState()
+		@checkRoutes(stateObj)
+
 
 	go: (num)->
 		History.go num
+
 
 	back : ()->
 		History.back()
