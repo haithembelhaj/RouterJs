@@ -63,8 +63,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			return true;
 		};
 		
-		Router.prototype.navigate = function (url, title, data, replace) {
+		Router.prototype.navigate = function (url, title, data, trigger, replace) {
 			data || (data = {});
+			trigger || (trigger = true);
+			
+			this.trigger = trigger;
 			
 			if (replace) {
 				return History.replaceState(data, title, url);

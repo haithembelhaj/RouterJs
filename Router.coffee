@@ -28,7 +28,7 @@ class window.Router
 					callback.apply(window, regex.exec(url).slice(1))
 		@trigger = true
 
-	navigate : (url, title, data, trigger=true)->
+	navigate : (url, title, data, trigger=true, replace=true)->
 		data or (data = {})
 		
 		@trigger = trigger
