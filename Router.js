@@ -6,6 +6,8 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/* jshint expr: true */
+
 (function() {
 
 	'use strict';
@@ -20,7 +22,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		
 		function Router(routes) {
 			var _this = this;
-			this.routes = routes != null ? routes : {};
+			
+			routes || (routes = {});
+			
+			this.routes = routes;
 			
 			History.Adapter.bind(window, 'statechange', function () {
 				return _this.checkRoutes(History.getState());
@@ -29,7 +34,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		
 		Router.prototype.route = function (route, callback) {
 			route = route.replace(Router.namedParam, '([^\/]+)').replace(Router.splatParam, '(.*?)');
-			return this.routes["^" + route + "$"] = callback;
+			
+			this.routes["^" + route + "$"] = callback;
+			return callback;
 		};
 		
 		Router.prototype.checkRoutes = function (state) {
@@ -39,16 +46,21 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				_ref = this.routes;
 				
 				for (regexText in _ref) {
-					callback = _ref[regexText];
-					regex = new RegExp(regexText);
-					url = state.data.url || state.hash;
-					
-					if (regex.test(url)) {
-						callback.apply(window, regex.exec(url).slice(1));
+					if (_ref.hasOwnProperty(regexText)) {
+						callback = _ref[regexText];
+						regex = new RegExp(regexText);
+						url = state.data.url || state.hash;
+						
+						if (regex.test(url)) {
+							callback.apply(window, regex.exec(url).slice(1));
+						}
 					}
 				}
 			}
-			return this.trigger = true;
+			
+			this.trigger = true;
+			
+			return true;
 		};
 		
 		Router.prototype.navigate = function (url, title, data, replace) {
