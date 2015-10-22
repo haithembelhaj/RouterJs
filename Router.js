@@ -16,18 +16,26 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         Router.splatParam = /\*\w+/g;
 
+        function _isPromise(value) {
+            if (typeof value.then !== "function") {
+                return false;
+            }
+            var promiseThenSrc = String($.Deferred().then);
+            var valueThenSrc = String(value.then);
+            return promiseThenSrc === valueThenSrc;
+        }
         Router.prototype.trigger = true;
 
-        Router.prototype.before = function(){
+        Router.prototype.before = function() {
 
         }
-        Router.prototype.after = function(){
+        Router.prototype.after = function() {
 
         }
 
         function Router(routes, append_slash) {
             var _this = this;
-            this._append_slash = (append_slash) ? '(\/|)' : '' ;
+            this._append_slash = (append_slash) ? '(\/|)' : '';
             routes || (routes = {});
 
             this.routes = routes;
@@ -39,12 +47,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
         Router.prototype.route = function(route, callback) {
             route = route.replace(Router.namedParam, '([^\/]+)').replace(Router.splatParam, '(.*?)');
-            this.routes["^" + route + this._append_slash+ "$"] = callback;
+            this.routes["^" + route + this._append_slash + "$"] = callback;
             return callback;
         };
 
+        Router.prototype.run = function(url ){
+            var _this = this;
+        };
+
         Router.prototype.checkRoutes = function(state) {
-            var callback, regex, regexText, url, _ref, _this = this;
+            var callback, regex, regexText, url, _ref, $deferred, _this = this;
 
             if (this.trigger) {
                 _ref = _this.routes;
@@ -56,8 +68,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
                         url = state.data.url || state.hash;
                         if (regex.test(url)) {
                             _this.before.apply(window);
-                            callback.apply(window, regex.exec(url).slice(1));
-                            _this.after.apply(window)
+                            $deferred = callback.apply(window, regex.exec(url).slice(1));
+                            if (_isPromise($deferred)) {
+                                $deferred.complete(function() {
+                                    _this.after.apply(window)
+                                });
+                            }
+                            else{
+                                _this.after.apply(window)
+                            }
+
                         }
                     }
                 }
